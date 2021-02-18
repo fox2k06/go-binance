@@ -33,6 +33,9 @@ type TimeInForceType string
 // NewOrderRespType define response JSON verbosity
 type NewOrderRespType string
 
+// OrderExecutionType define order execution type
+type OrderExecutionType string
+
 // OrderStatusType define order status type
 type OrderStatusType string
 
@@ -56,6 +59,18 @@ type MarginType string
 
 // ContractType define contract type
 type ContractType string
+
+// UserDataEventType define user data event type
+type UserDataEventType string
+
+// UserDataEventReasonType define reason type for user data event
+type UserDataEventReasonType string
+
+// Endpoints
+const (
+	baseApiMainUrl    = "https://fapi.binance.com"
+	baseApiTestnetUrl = "https://testnet.binancefuture.com"
+)
 
 // Global enums
 const (
@@ -82,12 +97,22 @@ const (
 	NewOrderRespTypeACK    NewOrderRespType = "ACK"
 	NewOrderRespTypeRESULT NewOrderRespType = "RESULT"
 
+	OrderExecutionTypeNew         OrderExecutionType = "NEW"
+	OrderExecutionTypePartialFill OrderExecutionType = "PARTIAL_FILL"
+	OrderExecutionTypeFill        OrderExecutionType = "FILL"
+	OrderExecutionTypeCanceled    OrderExecutionType = "CANCELED"
+	OrderExecutionTypeCalculated  OrderExecutionType = "CALCULATED"
+	OrderExecutionTypeExpired     OrderExecutionType = "EXPIRED"
+	OrderExecutionTypeTrade       OrderExecutionType = "TRADE"
+
 	OrderStatusTypeNew             OrderStatusType = "NEW"
 	OrderStatusTypePartiallyFilled OrderStatusType = "PARTIALLY_FILLED"
 	OrderStatusTypeFilled          OrderStatusType = "FILLED"
 	OrderStatusTypeCanceled        OrderStatusType = "CANCELED"
 	OrderStatusTypeRejected        OrderStatusType = "REJECTED"
 	OrderStatusTypeExpired         OrderStatusType = "EXPIRED"
+	OrderStatusTypeNewInsurance    OrderStatusType = "NEW_INSURANCE"
+	OrderStatusTypeNewADL          OrderStatusType = "NEW_ADL"
 
 	SymbolTypeFuture SymbolType = "FUTURE"
 
@@ -118,6 +143,27 @@ const (
 
 	ContractTypePerpetual ContractType = "PERPETUAL"
 
+	UserDataEventTypeListenKeyExpired    UserDataEventType = "listenKeyExpired"
+	UserDataEventTypeMarginCall          UserDataEventType = "MARGIN_CALL"
+	UserDataEventTypeAccountUpdate       UserDataEventType = "ACCOUNT_UPDATE"
+	UserDataEventTypeOrderTradeUpdate    UserDataEventType = "ORDER_TRADE_UPDATE"
+	UserDataEventTypeAccountConfigUpdate UserDataEventType = "ACCOUNT_CONFIG_UPDATE"
+
+	UserDataEventReasonTypeDeposit             UserDataEventReasonType = "DEPOSIT"
+	UserDataEventReasonTypeWithdraw            UserDataEventReasonType = "WITHDRAW"
+	UserDataEventReasonTypeOrder               UserDataEventReasonType = "ORDER"
+	UserDataEventReasonTypeFundingFee          UserDataEventReasonType = "FUNDING_FEE"
+	UserDataEventReasonTypeWithdrawReject      UserDataEventReasonType = "WITHDRAW_REJECT"
+	UserDataEventReasonTypeAdjustment          UserDataEventReasonType = "ADJUSTMENT"
+	UserDataEventReasonTypeInsuranceClear      UserDataEventReasonType = "INSURANCE_CLEAR"
+	UserDataEventReasonTypeAdminDeposit        UserDataEventReasonType = "ADMIN_DEPOSIT"
+	UserDataEventReasonTypeAdminWithdraw       UserDataEventReasonType = "ADMIN_WITHDRAW"
+	UserDataEventReasonTypeMarginTransfer      UserDataEventReasonType = "MARGIN_TRANSFER"
+	UserDataEventReasonTypeMarginTypeChange    UserDataEventReasonType = "MARGIN_TYPE_CHANGE"
+	UserDataEventReasonTypeAssetTransfer       UserDataEventReasonType = "ASSET_TRANSFER"
+	UserDataEventReasonTypeOptionsPremiumFee   UserDataEventReasonType = "OPTIONS_PREMIUM_FEE"
+	UserDataEventReasonTypeOptionsSettleProfit UserDataEventReasonType = "OPTIONS_SETTLE_PROFIT"
+
 	timestampKey  = "timestamp"
 	signatureKey  = "signature"
 	recvWindowKey = "recvWindow"
@@ -135,6 +181,14 @@ func newJSON(data []byte) (j *simplejson.Json, err error) {
 	return j, nil
 }
 
+// getApiEndpoint return the base endpoint of the WS according the UseTestnet flag
+func getApiEndpoint() string {
+	if UseTestnet {
+		return baseApiTestnetUrl
+	}
+	return baseApiMainUrl
+}
+
 // NewClient initialize an API client instance with API key and secret key.
 // You should always call this function before using this SDK.
 // Services will be created by the form client.NewXXXService().
@@ -142,7 +196,7 @@ func NewClient(apiKey, secretKey string) *Client {
 	return &Client{
 		APIKey:     apiKey,
 		SecretKey:  secretKey,
-		BaseURL:    "https://fapi.binance.com",
+		BaseURL:    getApiEndpoint(),
 		UserAgent:  "Binance/golang",
 		HTTPClient: http.DefaultClient,
 		Logger:     log.New(os.Stderr, "Binance-golang ", log.LstdFlags),

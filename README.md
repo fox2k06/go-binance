@@ -218,6 +218,8 @@ fmt.Println(res)
 
 You don't need Client in websocket API. Just call binance.WsXxxServe(args, handler, errHandler).
 
+> For delivery API you can use `delivery.WsXxxServe(args, handler, errHandler)`.
+
 #### Depth
 
 ```golang
@@ -306,3 +308,51 @@ Or you can also overwrite the `TimeOffset` yourself:
 ```golang
 client.TimeOffset = 123
 ```
+
+### Testnet
+
+You can use the testnet by enabling the corresponding flag.
+
+> Note that you can't use your regular API and Secret keys for the testnet. You have to create an account on
+> the testnet websites : [https://testnet.binancefuture.com/](https://testnet.binancefuture.com/) for futures and delivery
+> or [https://testnet.binance.vision/](https://testnet.binance.vision/) for the Spot Test Network.
+
+#### Spot
+
+Use the `binance.UseTestnet` flag before calling the client creation and the websockets methods.
+
+```go
+import (
+    "github.com/adshao/go-binance/v2"
+)
+
+binance.UseTestnet = true
+client := binance.NewClient(apiKey, secretKey)
+```
+
+#### Futures (usd(s)-m futures)
+
+Use the `futures.UseTestnet` flag before calling the client creation and the websockets methods
+
+```go
+import (
+    "github.com/adshao/go-binance/v2/futures"
+)
+
+futures.UseTestnet = true
+BinanceClient = futures.NewClient(ApiKey, SecretKey)
+```
+
+#### Delivery (coin-m futures)
+
+Use the `delivery.UseTestnet` flag before calling the client creation and the websockets methods
+
+```go
+import (
+    "github.com/adshao/go-binance/v2/delivery"
+)
+
+delivery.UseTestnet = true
+BinanceClient = delivery.NewClient(ApiKey, SecretKey)
+```
+
